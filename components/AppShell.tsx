@@ -66,8 +66,6 @@ const REGISTERED_PUBLIC_TABS = [
 
 const UNREGISTERED_PUBLIC_TABS = [
   { href: "/register",  label: "Register",  icon: (a: boolean) => <RegisterIcon active={a} /> },
-  { href: "/programme", label: "Programme", icon: (a: boolean) => <CalIcon active={a} /> },
-  { href: "/partners",  label: "Partners",  icon: (a: boolean) => <PartnersIcon active={a} /> },
 ];
 
 const ADMIN_TABS = [
