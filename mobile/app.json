@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "Oak Foundation Event",
+    "slug": "oak-foundation-event",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "scheme": "oakfoundation",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1B2B4B"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "foundation.oak.eventapp"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#1B2B4B"
+      },
+      "package": "foundation.oak.eventapp"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-camera",
+      "expo-secure-store"
+    ]
+  }
+}
