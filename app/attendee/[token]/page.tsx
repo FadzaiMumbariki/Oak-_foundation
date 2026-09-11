@@ -1,4 +1,5 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase/server";
+import { getDevAttendeeByToken } from "@/lib/dev-store";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import AppShell from "@/components/AppShell";
@@ -22,50 +23,40 @@ export default async function AttendeePage({ params }: Props) {
   const { token } = await params;
   let attendee: AttendeePass | null = null;
 
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("attendee_passes")
-      .select("id, full_name, organization, sub_partner, role_title, qr_token")
-      .eq("qr_token", token)
-      .single();
-    if (!error && data) attendee = data as AttendeePass;
-  } catch {
-    // dev fallback below
+  if (isSupabaseConfigured()) {
+    try {
+      const supabase = await createAdminClient();
+      const { data, error } = await supabase
+        .from("attendees")
+        .select("id, full_name, organization, sub_partner, role_title, qr_token")
+        .eq("qr_token", token)
+        .maybeSingle();
+
+      if (!error && data) {
+        attendee = data as AttendeePass;
+      }
+    } catch (err) {
+      console.error("[attendee-pass] Supabase fetch error:", err);
+    }
+  }
+
+  // Check dev-store for real registered attendees in local dev
+  if (!attendee) {
+    const devAtt = getDevAttendeeByToken(token);
+    if (devAtt) {
+      attendee = {
+        id: devAtt.id,
+        full_name: devAtt.full_name,
+        organization: devAtt.organization,
+        sub_partner: devAtt.sub_partner,
+        role_title: devAtt.role_title,
+        qr_token: devAtt.qr_token,
+      };
+    }
   }
 
   if (!attendee) {
-    if (token.startsWith("mock-") || token === "demo" || process.env.NODE_ENV === "development") {
-      // Try to decode real form data encoded in mock token
-      let full_name = "Demo Attendee";
-      let organization = "OAK Foundation";
-      let role_title = "Partner";
-      let sub_partner = null;
-
-      if (token.startsWith("mock-") && token.length > 10) {
-        try {
-          const encoded = token.replace(/^mock-/, "");
-          const decoded = JSON.parse(Buffer.from(encoded, "base64url").toString("utf8"));
-          full_name    = decoded.full_name    || full_name;
-          organization = decoded.organization || organization;
-          role_title   = decoded.role_title   || role_title;
-          sub_partner  = decoded.sub_partner  || null;
-        } catch {
-          // fallback to defaults above
-        }
-      }
-
-      attendee = {
-        id: "mock-001",
-        full_name,
-        organization,
-        sub_partner,
-        role_title,
-        qr_token: token,
-      };
-    } else {
-      notFound();
-    }
+    notFound();
   }
 
   return (
@@ -74,3 +65,4 @@ export default async function AttendeePage({ params }: Props) {
     </AppShell>
   );
 }
+
