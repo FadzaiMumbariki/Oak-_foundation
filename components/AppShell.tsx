@@ -107,44 +107,46 @@ export default function AppShell({ children, variant = "public" }: AppShellProps
     <div className="flex min-h-screen bg-[#F5F6FA]">
 
       {/* ════════════════════════════════════════
-          DESKTOP sidebar (md and up)
+          DESKTOP sidebar (md and up) — Fixed 100vh
       ════════════════════════════════════════ */}
-      <aside className="hidden md:flex w-[220px] shrink-0 flex-col border-r border-gray-200 bg-white">
-        {/* Logo */}
-        <div className="px-5 pt-6 pb-4 border-b border-gray-100">
-          <Link href="/" className="inline-flex">
-            <OakLogo className="h-[52px] w-auto" />
-          </Link>
-          <p className="mt-3 text-[10px] font-bold tracking-widest text-gray-400 uppercase">
-            Partner Convening 2026
-          </p>
+      <aside className="hidden md:flex sticky top-0 h-screen w-[220px] shrink-0 flex-col justify-between border-r border-gray-200 bg-white z-40 overflow-y-auto">
+        <div className="flex flex-col">
+          {/* Logo */}
+          <div className="px-5 pt-6 pb-4 border-b border-gray-100">
+            <Link href="/" className="inline-flex">
+              <OakLogo className="h-[52px] w-auto" />
+            </Link>
+            <p className="mt-3 text-[10px] font-bold tracking-widest text-gray-400 uppercase">
+              Partner Convening 2026
+            </p>
+          </div>
+
+          {/* Nav links */}
+          <nav className="px-3 py-4 space-y-0.5">
+            {tabs.map((tab) => {
+              const active = isActive(tab.href);
+              return (
+                <Link
+                  key={tab.href}
+                  href={tab.href}
+                  className={`flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                    active
+                      ? "bg-[#1B2B4B] text-white"
+                      : "text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+                  }`}
+                >
+                  <span className={active ? "text-white" : "text-gray-400"}>
+                    {tab.icon(active)}
+                  </span>
+                  {tab.label}
+                </Link>
+              );
+            })}
+          </nav>
         </div>
 
-        {/* Nav links */}
-        <nav className="flex-1 px-3 py-4 space-y-0.5">
-          {tabs.map((tab) => {
-            const active = isActive(tab.href);
-            return (
-              <Link
-                key={tab.href}
-                href={tab.href}
-                className={`flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                  active
-                    ? "bg-[#1B2B4B] text-white"
-                    : "text-gray-500 hover:bg-gray-100 hover:text-gray-900"
-                }`}
-              >
-                <span className={active ? "text-white" : "text-gray-400"}>
-                  {tab.icon(active)}
-                </span>
-                {tab.label}
-              </Link>
-            );
-          })}
-        </nav>
-
         {/* Location footer */}
-        <div className="px-5 py-4 border-t border-gray-100">
+        <div className="px-5 py-4 border-t border-gray-100 mt-auto">
           <div className="flex items-center gap-2 text-[11px] text-gray-400">
             <svg className="h-3 w-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />

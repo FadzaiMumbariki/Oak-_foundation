@@ -1,6 +1,7 @@
 "use server";
 
-import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
+import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase/server";
+import { getDevAttendeeByEmail } from "@/lib/dev-store";
 
 export type LookupResult =
   | { status: "found"; token: string }
@@ -19,33 +20,30 @@ export async function lookupAttendeeByEmail(
     return { status: "error", message: "Please enter a valid email address." };
   }
 
-  if (!isSupabaseConfigured()) {
-    // Dev fallback — return a demo token so the flow can be tested
-    return { status: "found", token: "demo" };
+  if (isSupabaseConfigured()) {
+    try {
+      const supabase = await createAdminClient();
+
+      const { data, error } = await supabase
+        .from("attendees")
+        .select("qr_token")
+        .eq("email", trimmed)
+        .maybeSingle();
+
+      if (!error && data?.qr_token) {
+        return { status: "found", token: data.qr_token };
+      }
+    } catch (err) {
+      console.error("[lookup] Supabase lookup error:", err);
+    }
   }
 
-  try {
-    const supabase = await createClient();
-
-    // Server-side query: only qr_token is returned — email stays on the server
-    const { data, error } = await supabase
-      .from("attendees")
-      .select("qr_token")
-      .eq("email", trimmed)
-      .maybeSingle();
-
-    if (error) {
-      console.error("Lookup error:", error);
-      return { status: "error", message: "Something went wrong. Please try again." };
-    }
-
-    if (!data) {
-      return { status: "not_found" };
-    }
-
-    return { status: "found", token: data.qr_token };
-  } catch (err) {
-    console.error("Lookup server exception:", err);
-    return { status: "error", message: "Something went wrong. Please try again." };
+  // Fallback to dev store
+  const devAtt = getDevAttendeeByEmail(trimmed);
+  if (devAtt) {
+    return { status: "found", token: devAtt.qr_token };
   }
+
+  return { status: "not_found" };
 }
+

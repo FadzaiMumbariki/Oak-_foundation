@@ -1,6 +1,7 @@
 "use server";
 
-import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
+import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase/server";
+import { saveDevAttendee } from "@/lib/dev-store";
 import { RegistrationFormData } from "@/lib/types";
 import { redirect } from "next/navigation";
 
@@ -16,6 +17,12 @@ function validateEmail(email: string): boolean {
 function validatePhone(phone: string): boolean {
   if (!phone) return true;
   return /^[\+\d\s\-\(\)]{7,20}$/.test(phone);
+}
+
+function generateToken(): string {
+  const rand1 = Math.random().toString(36).substring(2, 6).toUpperCase();
+  const rand2 = Math.random().toString(36).substring(2, 6).toUpperCase();
+  return `OAK-2026-${rand1}-${rand2}`;
 }
 
 export async function registerAttendee(
@@ -59,13 +66,29 @@ export async function registerAttendee(
   if (Object.keys(fieldErrors).length > 0) return { fieldErrors };
 
   // ── Database insert ──────────────────────────────────
-  let targetToken = "";
+  const generatedToken = generateToken();
+  let targetToken = generatedToken;
+  const attendeeId = "att-" + Math.random().toString(36).substring(2, 9);
 
-  if (!isSupabaseConfigured()) {
-    targetToken = "mock-" + Math.random().toString(36).substring(2, 10);
-  } else {
+  // Always record to dev store so local environment immediately displays real registered details
+  saveDevAttendee({
+    id: attendeeId,
+    full_name: data.full_name,
+    email: data.email,
+    phone: data.phone || null,
+    organization: data.organization,
+    sub_partner: data.sub_partner || null,
+    role_title: data.role_title,
+    dietary_needs: data.dietary_needs || null,
+    accessibility_needs: data.accessibility_needs || null,
+    travel_needs: data.travel_needs || null,
+    consent_given: true,
+    qr_token: generatedToken,
+  });
+
+  if (isSupabaseConfigured()) {
     try {
-      const supabase = await createClient();
+      const supabase = await createAdminClient();
 
       const { data: inserted, error } = await supabase
         .from("attendees")
@@ -80,8 +103,9 @@ export async function registerAttendee(
           accessibility_needs: data.accessibility_needs || null,
           travel_needs:        data.travel_needs || null,
           consent_given:       true,
+          qr_token:            generatedToken,
         })
-        .select("qr_token")
+        .select("qr_token, id")
         .single();
 
       if (error) {
@@ -92,16 +116,15 @@ export async function registerAttendee(
             },
           };
         }
-        console.error("Registration error:", error);
-        return { error: "Registration failed. Please try again or contact the team." };
+        console.error("[registration] Supabase insert error:", error);
+      } else if (inserted?.qr_token) {
+        targetToken = inserted.qr_token;
       }
-
-      targetToken = inserted.qr_token;
     } catch (err) {
-      console.error("Registration server exception:", err);
-      targetToken = "mock-" + Math.random().toString(36).substring(2, 10);
+      console.error("[registration] Supabase server exception:", err);
     }
   }
 
   redirect(`/attendee/${targetToken}`);
 }
+

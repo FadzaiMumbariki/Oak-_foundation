@@ -1,5 +1,7 @@
 "use client";
 
+import { useState, useEffect } from "react";
+
 /* ── Session notes data ───────────────────────────────── */
 const NOTES = [
   {
@@ -50,37 +52,43 @@ const TAKEAWAYS = [
   "Peer workshops created more valuable than export-led sessions: 50% vs 74%.",
 ];
 
-/* ── Photo gallery — Unsplash CDN (free to use) ───────── */
+/* ── Photo gallery — Convening Photos ────────────────── */
 const PHOTOS = [
   {
     id: "p1",
-    url: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&q=80",
-    alt: "Conference audience in dark auditorium",
+    url: "/gallery/gallery-5.png",
+    alt: "Auditorium plenary assembly and partner audience in session",
+    caption: "Opening Plenary · Partner Assembly",
   },
   {
     id: "p2",
-    url: "https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=600&q=80",
-    alt: "Microphone at event with blurred crowd",
+    url: "/gallery/gallery-6.png",
+    alt: "Conference microphone at speaker podium",
+    caption: "Speaker Podium & Thematic Dialogue",
   },
   {
     id: "p3",
-    url: "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=600&q=80",
-    alt: "Workshop participants with laptop",
+    url: "/gallery/gallery-3.png",
+    alt: "Collaborative breakout working group around laptops",
+    caption: "Working Group · Collaborative Strategy",
   },
   {
     id: "p4",
-    url: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&q=80",
-    alt: "Empty modern conference room",
+    url: "/gallery/gallery-4.png",
+    alt: "Main conference boardroom and executive meeting space",
+    caption: "Main Boardroom & Strategic Convening Space",
   },
   {
     id: "p5",
-    url: "https://images.unsplash.com/photo-1559223607-a43c990c692c?w=600&q=80",
-    alt: "Speaker presenting to small group",
+    url: "/gallery/gallery-1.png",
+    alt: "Speaker presentation and interactive discussion with attendees",
+    caption: "Interactive Session · Speaker Presentation",
   },
   {
     id: "p6",
-    url: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=600&q=80",
-    alt: "Business person with briefcase",
+    url: "/gallery/gallery-2.png",
+    alt: "Partner delegate arriving with conference briefcase",
+    caption: "Partner Arrival & Delegate Check-In",
   },
 ];
 
@@ -94,6 +102,24 @@ function DownloadIcon() {
 }
 
 export default function DocsTab() {
+  const [activePhotoIndex, setActivePhotoIndex] = useState<number | null>(null);
+
+  // Keyboard navigation for lightbox
+  useEffect(() => {
+    if (activePhotoIndex === null) return;
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        setActivePhotoIndex(null);
+      } else if (e.key === "ArrowRight") {
+        setActivePhotoIndex((prev) => (prev !== null ? (prev + 1) % PHOTOS.length : null));
+      } else if (e.key === "ArrowLeft") {
+        setActivePhotoIndex((prev) => (prev !== null ? (prev - 1 + PHOTOS.length) % PHOTOS.length : null));
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [activePhotoIndex]);
+
   return (
     <div className="space-y-6">
 
@@ -134,29 +160,115 @@ export default function DocsTab() {
       {/* ── Photo Gallery ─────────────────────────── */}
       <section>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="flex items-center gap-2 text-sm font-bold text-[#1B2B4B]">
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <h2 className="flex items-center gap-2 text-sm sm:text-base font-bold text-[#1B2B4B]">
+            <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
             Photo Gallery
           </h2>
-          <button className="text-xs text-[#1B2B4B] font-semibold hover:underline">Browse</button>
+          <span className="rounded-full bg-[#ECEEF2] px-2.5 py-0.5 text-[11px] font-medium text-gray-500">
+            {PHOTOS.length} photos
+          </span>
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
-          {PHOTOS.map((p) => (
-            <div key={p.id} className="rounded-xl overflow-hidden aspect-[4/3] bg-gray-100">
+        {/* 2-column Grid matching exact UI reference */}
+        <div className="grid grid-cols-2 gap-3">
+          {PHOTOS.map((p, index) => (
+            <button
+              key={p.id}
+              onClick={() => setActivePhotoIndex(index)}
+              className="group relative aspect-[4/3] w-full rounded-2xl overflow-hidden bg-gray-100 shadow-sm transition-all hover:shadow-md hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-[#1B2B4B]"
+            >
               <img
                 src={p.url}
                 alt={p.alt}
-                className="h-full w-full object-cover"
+                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                 loading="lazy"
               />
-            </div>
+            </button>
           ))}
         </div>
-        <p className="text-right text-xs text-gray-400 mt-1">{PHOTOS.length} photos</p>
       </section>
+
+      {/* ── Photo Lightbox Modal ──────────────────── */}
+      {activePhotoIndex !== null && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+          onClick={() => setActivePhotoIndex(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Photo Preview"
+        >
+          <div
+            className="relative max-w-3xl w-full bg-black/90 rounded-2xl overflow-hidden shadow-2xl border border-white/10"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header controls */}
+            <div className="flex items-center justify-between px-4 py-3 bg-[#1B2B4B]/80 border-b border-white/10 text-white">
+              <div>
+                <p className="text-xs font-bold">{PHOTOS[activePhotoIndex].caption}</p>
+                <p className="text-[10px] text-white/60">
+                  Photo {activePhotoIndex + 1} of {PHOTOS.length}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <a
+                  href={PHOTOS[activePhotoIndex].url}
+                  download={`oak-2026-photo-${activePhotoIndex + 1}.png`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="rounded-lg bg-white/10 px-2.5 py-1 text-xs font-medium text-white hover:bg-white/20 transition-colors flex items-center gap-1"
+                >
+                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  Save
+                </a>
+                <button
+                  onClick={() => setActivePhotoIndex(null)}
+                  className="rounded-lg p-1 text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+                  aria-label="Close photo preview"
+                >
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* Photo */}
+            <div className="relative aspect-[16/10] sm:aspect-[16/9] w-full bg-black flex items-center justify-center overflow-hidden">
+              <img
+                src={PHOTOS[activePhotoIndex].url}
+                alt={PHOTOS[activePhotoIndex].alt}
+                className="max-h-[70vh] w-auto max-w-full object-contain mx-auto"
+              />
+
+              {/* Prev button */}
+              <button
+                onClick={() => setActivePhotoIndex((prev) => (prev !== null ? (prev - 1 + PHOTOS.length) % PHOTOS.length : null))}
+                className="absolute left-3 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/90 transition-all border border-white/20"
+                aria-label="Previous photo"
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+
+              {/* Next button */}
+              <button
+                onClick={() => setActivePhotoIndex((prev) => (prev !== null ? (prev + 1) % PHOTOS.length : null))}
+                className="absolute right-3 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/90 transition-all border border-white/20"
+                aria-label="Next photo"
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Key Takeaways ─────────────────────────── */}
       <section>
@@ -210,3 +322,4 @@ export default function DocsTab() {
     </div>
   );
 }
+
