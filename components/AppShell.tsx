@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
 import OakLogo from "./OakLogo";
+import { getPassToken } from "@/lib/passStore";
 
 /* ── Icons ────────────────────────────────────────────── */
 function RegisterIcon({ active }: { active: boolean }) {
@@ -56,16 +58,20 @@ function NametagIcon({ active }: { active: boolean }) {
 }
 
 /* ── Nav config ───────────────────────────────────────── */
-const PUBLIC_TABS = [
-  { href: "/register",  label: "Register",   icon: (a: boolean) => <RegisterIcon active={a} /> },
-  { href: "/attendee/lookup", label: "My Pass",    icon: (a: boolean) => <PassIcon active={a} /> },
-  { href: "/programme", label: "Programme",  icon: (a: boolean) => <CalIcon active={a} /> },
-  { href: "/partners",  label: "Partners",   icon: (a: boolean) => <PartnersIcon active={a} /> },
+const REGISTERED_PUBLIC_TABS = [
+  { href: "MY_PASS",    label: "My Pass",   icon: (a: boolean) => <PassIcon active={a} /> },
+  { href: "/programme", label: "Programme", icon: (a: boolean) => <CalIcon active={a} /> },
+  { href: "/partners",  label: "Partners",  icon: (a: boolean) => <PartnersIcon active={a} /> },
+];
+
+const UNREGISTERED_PUBLIC_TABS = [
+  { href: "/register",  label: "Register",  icon: (a: boolean) => <RegisterIcon active={a} /> },
+  { href: "/programme", label: "Programme", icon: (a: boolean) => <CalIcon active={a} /> },
+  { href: "/partners",  label: "Partners",  icon: (a: boolean) => <PartnersIcon active={a} /> },
 ];
 
 const ADMIN_TABS = [
   { href: "/register",         label: "Register",   icon: (a: boolean) => <RegisterIcon active={a} /> },
-  { href: "/attendee/lookup", label: "My Pass",    icon: (a: boolean) => <PassIcon active={a} /> },
   { href: "/admin/checkin",    label: "Check In",   icon: (a: boolean) => <ScanIcon active={a} /> },
   { href: "/programme",        label: "Programme",  icon: (a: boolean) => <CalIcon active={a} /> },
   { href: "/partners",         label: "Partners",   icon: (a: boolean) => <PartnersIcon active={a} /> },
@@ -80,11 +86,23 @@ interface AppShellProps {
 }
 
 export default function AppShell({ children, variant = "public" }: AppShellProps) {
-  const pathname  = usePathname();
-  const tabs      = variant === "admin" ? ADMIN_TABS : PUBLIC_TABS;
+  const pathname = usePathname();
+  const [passToken, setPassToken] = useState<string | null>(null);
+
+  // Read token from localStorage after hydration
+  useEffect(() => {
+    setPassToken(getPassToken());
+  }, []);
+
+  // Build nav — swap "MY_PASS" placeholder with real token URL
+  const rawTabs = variant === "admin" ? ADMIN_TABS : (passToken ? REGISTERED_PUBLIC_TABS : UNREGISTERED_PUBLIC_TABS);
+  const tabs = rawTabs.map((t) => ({
+    ...t,
+    href: t.href === "MY_PASS" ? `/attendee/${passToken}` : t.href,
+  }));
 
   function isActive(href: string) {
-    return pathname === href || pathname.startsWith(href + "/");
+    return pathname === href || pathname.startsWith(href.replace(/\/attendee\/.*/, "/attendee/"));
   }
 
   return (

@@ -1,17 +1,20 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import type { AttendeePass } from "@/lib/types";
+import { savePassToken } from "@/lib/passStore";
 
 export default function AttendeePassCard({ attendee }: { attendee: AttendeePass }) {
   const qrRef = useRef<SVGSVGElement>(null);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [qrValue, setQrValue] = useState(`/attendee/${attendee.qr_token}`);
 
-  const qrValue =
-    typeof window !== "undefined"
-      ? `${window.location.origin}/attendee/${attendee.qr_token}`
-      : `/attendee/${attendee.qr_token}`;
+  useEffect(() => {
+    // Persist token so nav switches to "My Pass"
+    savePassToken(attendee.qr_token);
+    setQrValue(`${window.location.origin}/attendee/${attendee.qr_token}`);
+  }, [attendee.qr_token]);
 
   function handleDownload() {
     setIsDownloading(true);
