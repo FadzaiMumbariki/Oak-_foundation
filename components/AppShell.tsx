@@ -161,7 +161,7 @@ export default function AppShell({ children, variant = "public" }: AppShellProps
         {/* ── Page content ───────────────────────── */}
         <main className="flex-1 overflow-y-auto pb-20 md:pb-0">
           {/* Desktop: constrained width with padding */}
-          <div className="md:p-8 p-4 md:max-w-3xl">
+          <div className="md:p-8 p-4 md:max-w-3xl mx-auto w-full">
             {children}
           </div>
         </main>
