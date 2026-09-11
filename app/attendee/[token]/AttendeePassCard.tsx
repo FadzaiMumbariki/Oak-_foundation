@@ -51,6 +51,10 @@ export default function AttendeePassCard({ attendee }: { attendee: AttendeePass 
   const raw = attendee.qr_token.replace(/-/g, "").toUpperCase().slice(0, 8);
   const displayToken = `OAK-2026-${raw.slice(0, 4)}-${raw.slice(4, 8)}`;
 
+  const isPartner = Boolean(
+    attendee.role_title && attendee.role_title.toLowerCase().trim().includes("partner")
+  );
+
   return (
     <div className="space-y-4 max-w-2xl">
       {/* ── Success hero banner ─────────────────────────── */}
@@ -74,47 +78,83 @@ export default function AttendeePassCard({ attendee }: { attendee: AttendeePass 
         </div>
       </div>
 
-      {/* ── QR code card ────────────────────────────────── */}
-      <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-        <p className="text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-5 text-center">
-          Your Entry Pass
-        </p>
+      {/* ── Conditional Entry Pass / QR Card ────────────── */}
+      {isPartner ? (
+        /* Partner entry pass with QR code */
+        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-5">
+            <p className="text-[10px] font-bold tracking-widest text-gray-400 uppercase">
+              Partner Entry Pass
+            </p>
+            <span className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-semibold text-blue-700">
+              Partner QR Pass
+            </span>
+          </div>
 
-        {/* QR code */}
-        <div className="flex justify-center mb-4">
-          <div className="rounded-2xl border-2 border-gray-100 bg-white p-5 shadow-inner">
-            <QRCodeSVG
-              ref={qrRef}
-              value={qrValue}
-              size={180}
-              level="H"
-              includeMargin={false}
-              fgColor="#1B2B4B"
-              bgColor="#FFFFFF"
-            />
+          {/* QR code */}
+          <div className="flex justify-center mb-4">
+            <div className="rounded-2xl border-2 border-gray-100 bg-white p-5 shadow-inner">
+              <QRCodeSVG
+                ref={qrRef}
+                value={qrValue}
+                size={180}
+                level="H"
+                includeMargin={false}
+                fgColor="#1B2B4B"
+                bgColor="#FFFFFF"
+              />
+            </div>
+          </div>
+
+          <div className="text-center space-y-1 mb-5">
+            <p className="font-mono text-xs font-semibold text-gray-500 tracking-widest">
+              {displayToken}
+            </p>
+            <p className="text-xs text-gray-400">Present at event entrance for check-in</p>
+          </div>
+
+          {/* Download button */}
+          <button
+            onClick={handleDownload}
+            disabled={isDownloading}
+            className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#1B2B4B] py-3.5 text-sm font-bold text-white
+                       hover:bg-[#243a63] transition-colors disabled:opacity-60"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            {isDownloading ? "Saving…" : "Download QR Code"}
+          </button>
+        </div>
+      ) : (
+        /* Non-partner registration confirmation card (No QR code) */
+        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-[10px] font-bold tracking-widest text-gray-400 uppercase">
+              Registration Pass
+            </p>
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-semibold text-emerald-700">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              Confirmed
+            </span>
+          </div>
+
+          <div className="rounded-xl bg-[#F8FAFC] border border-gray-100 p-6 text-center my-2">
+            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#1B2B4B]/10 text-[#1B2B4B]">
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <p className="text-base font-bold text-[#1B2B4B]">{attendee.role_title} Registration</p>
+            <p className="font-mono text-xs font-semibold text-gray-500 tracking-widest mt-1">
+              Ref: {displayToken}
+            </p>
+            <p className="text-xs text-gray-500 mt-3 max-w-md mx-auto leading-relaxed">
+              Your registration has been confirmed on the attendee list. Please check in at the registration desk with your name upon arrival.
+            </p>
           </div>
         </div>
-
-        <div className="text-center space-y-1 mb-5">
-          <p className="font-mono text-xs font-semibold text-gray-500 tracking-widest">
-            {displayToken}
-          </p>
-          <p className="text-xs text-gray-400">Present at event entrance for check-in</p>
-        </div>
-
-        {/* Download button */}
-        <button
-          onClick={handleDownload}
-          disabled={isDownloading}
-          className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#1B2B4B] py-3.5 text-sm font-bold text-white
-                     hover:bg-[#243a63] transition-colors disabled:opacity-60"
-        >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-          </svg>
-          {isDownloading ? "Saving…" : "Download QR Code"}
-        </button>
-      </div>
+      )}
 
       {/* ── Registration details ─────────────────────────── */}
       <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
