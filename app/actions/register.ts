@@ -62,7 +62,14 @@ export async function registerAttendee(
   let targetToken = "";
 
   if (!isSupabaseConfigured()) {
-    targetToken = "mock-" + Math.random().toString(36).substring(2, 10);
+    // Encode real form data into a URL-safe token so the pass page shows the right name
+    const mockData = Buffer.from(JSON.stringify({
+      full_name:    data.full_name,
+      organization: data.organization,
+      role_title:   data.role_title,
+      sub_partner:  data.sub_partner || null,
+    })).toString("base64url");
+    targetToken = "mock-" + mockData;
   } else {
     try {
       const supabase = await createClient();

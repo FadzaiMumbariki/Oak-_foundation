@@ -36,12 +36,31 @@ export default async function AttendeePage({ params }: Props) {
 
   if (!attendee) {
     if (token.startsWith("mock-") || token === "demo" || process.env.NODE_ENV === "development") {
+      // Try to decode real form data encoded in mock token
+      let full_name = "Demo Attendee";
+      let organization = "OAK Foundation";
+      let role_title = "Partner";
+      let sub_partner = null;
+
+      if (token.startsWith("mock-") && token.length > 10) {
+        try {
+          const encoded = token.replace(/^mock-/, "");
+          const decoded = JSON.parse(Buffer.from(encoded, "base64url").toString("utf8"));
+          full_name    = decoded.full_name    || full_name;
+          organization = decoded.organization || organization;
+          role_title   = decoded.role_title   || role_title;
+          sub_partner  = decoded.sub_partner  || null;
+        } catch {
+          // fallback to defaults above
+        }
+      }
+
       attendee = {
         id: "mock-001",
-        full_name: "Tinashe Smith",
-        organization: "uncommon.org",
-        sub_partner: null,
-        role_title: "Partner",
+        full_name,
+        organization,
+        sub_partner,
+        role_title,
         qr_token: token,
       };
     } else {

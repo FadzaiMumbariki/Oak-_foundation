@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { CalendarDays, Handshake, type LucideIcon, Users } from "lucide-react";
 import AppShell from "@/components/AppShell";
 import RegistrationForm from "./RegistrationForm";
+import ClearPass from "./ClearPass";
 
 export const metadata: Metadata = {
   title: "Register — OAK Partner Convening 2026",
@@ -17,6 +18,7 @@ const stats: { value: string; label: string; icon: LucideIcon }[] = [
 export default function RegisterPage() {
   return (
     <AppShell variant="public">
+      <ClearPass />
       {/* ── Hero card ───────────────────────────── */}
       <div className="relative overflow-hidden rounded-2xl bg-[#1B2B4B] px-6 py-6 mb-4 shadow-sm">
         <div className="pointer-events-none absolute -top-8 -right-8 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
