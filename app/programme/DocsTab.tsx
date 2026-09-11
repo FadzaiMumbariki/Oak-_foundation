@@ -50,14 +50,38 @@ const TAKEAWAYS = [
   "Peer workshops created more valuable than export-led sessions: 50% vs 74%.",
 ];
 
-/* ── Photo placeholders ───────────────────────────────── */
+/* ── Photo gallery — Unsplash CDN (free to use) ───────── */
 const PHOTOS = [
-  { id: "p1", bg: "bg-gray-800" },
-  { id: "p2", bg: "bg-slate-700" },
-  { id: "p3", bg: "bg-gray-700" },
-  { id: "p4", bg: "bg-slate-600" },
-  { id: "p5", bg: "bg-gray-600" },
-  { id: "p6", bg: "bg-slate-800" },
+  {
+    id: "p1",
+    url: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&q=80",
+    alt: "Conference audience in dark auditorium",
+  },
+  {
+    id: "p2",
+    url: "https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=600&q=80",
+    alt: "Microphone at event with blurred crowd",
+  },
+  {
+    id: "p3",
+    url: "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=600&q=80",
+    alt: "Workshop participants with laptop",
+  },
+  {
+    id: "p4",
+    url: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&q=80",
+    alt: "Empty modern conference room",
+  },
+  {
+    id: "p5",
+    url: "https://images.unsplash.com/photo-1559223607-a43c990c692c?w=600&q=80",
+    alt: "Speaker presenting to small group",
+  },
+  {
+    id: "p6",
+    url: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=600&q=80",
+    alt: "Business person with briefcase",
+  },
 ];
 
 /* ── Download icon ────────────────────────────────────── */
@@ -121,17 +145,17 @@ export default function DocsTab() {
 
         <div className="grid grid-cols-2 gap-2">
           {PHOTOS.map((p) => (
-            <div
-              key={p.id}
-              className={`${p.bg} rounded-xl aspect-[4/3] flex items-center justify-center`}
-            >
-              <svg className="h-8 w-8 text-white/20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
+            <div key={p.id} className="rounded-xl overflow-hidden aspect-[4/3] bg-gray-100">
+              <img
+                src={p.url}
+                alt={p.alt}
+                className="h-full w-full object-cover"
+                loading="lazy"
+              />
             </div>
           ))}
         </div>
-        <p className="text-center text-xs text-gray-400 mt-2">Photos will be added during the event</p>
+        <p className="text-right text-xs text-gray-400 mt-1">{PHOTOS.length} photos</p>
       </section>
 
       {/* ── Key Takeaways ─────────────────────────── */}
