@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import OakLogo from "./OakLogo";
 
 /* ── Icons ────────────────────────────────────────────── */
 function RegisterIcon({ active }: { active: boolean }) {
@@ -72,17 +73,6 @@ const ADMIN_TABS = [
   { href: "/admin/nametags",   label: "Nametags",   icon: (a: boolean) => <NametagIcon active={a} /> },
 ];
 
-/* ── OAK logo mark ────────────────────────────────────── */
-function OakMark() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6">
-      <circle cx="12" cy="12" r="11" fill="white" fillOpacity="0.15" />
-      <circle cx="12" cy="12" r="7"  fill="none" stroke="white" strokeWidth="2.5" />
-      <circle cx="12" cy="12" r="3"  fill="white" />
-    </svg>
-  );
-}
-
 /* ── AppShell ─────────────────────────────────────────── */
 interface AppShellProps {
   children: React.ReactNode;
@@ -106,16 +96,8 @@ export default function AppShell({ children, variant = "public" }: AppShellProps
       <aside className="hidden md:flex w-[220px] shrink-0 flex-col border-r border-gray-200 bg-white">
         {/* Logo */}
         <div className="px-5 pt-6 pb-4 border-b border-gray-100">
-          <Link href="/" className="flex flex-col">
-            <div className="flex items-center gap-1.5 mb-0.5">
-              <svg viewBox="0 0 24 24" fill="none" className="h-7 w-7">
-                <circle cx="12" cy="12" r="11" fill="#1B2B4B" />
-                <circle cx="12" cy="12" r="7"  fill="none" stroke="white" strokeWidth="2.5" />
-                <circle cx="12" cy="12" r="3"  fill="white" />
-              </svg>
-              <span className="text-[22px] font-black tracking-tight text-[#1B2B4B] leading-none">AK</span>
-            </div>
-            <span className="text-[9px] font-bold tracking-[0.2em] text-[#1B2B4B]/50 uppercase ml-0.5">Foundation</span>
+          <Link href="/" className="inline-flex">
+            <OakLogo className="h-[52px] w-auto" />
           </Link>
           <p className="mt-3 text-[10px] font-bold tracking-widest text-gray-400 uppercase">
             Partner Convening 2026
@@ -167,7 +149,9 @@ export default function AppShell({ children, variant = "public" }: AppShellProps
 
         {/* ── Mobile top navbar ──────────────────── */}
         <header className="md:hidden flex items-center gap-3 bg-[#1B2B4B] px-4 py-3 shrink-0">
-          <OakMark />
+          <span className="flex h-9 w-14 items-center justify-center rounded bg-white px-1.5 py-1">
+            <OakLogo className="h-full w-auto" />
+          </span>
           <div className="h-4 w-px bg-white/20" />
           <span className="text-[11px] font-bold tracking-widest text-white/80 uppercase">
             Partner Convening 2026

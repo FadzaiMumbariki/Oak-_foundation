@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { CalendarDays, Handshake, type LucideIcon, Users } from "lucide-react";
 import AppShell from "@/components/AppShell";
 import RegistrationForm from "./RegistrationForm";
 
@@ -6,6 +7,12 @@ export const metadata: Metadata = {
   title: "Register — OAK Partner Convening 2026",
   description: "Registration and attendance platform for the OAK Foundation Partner Convening 2026.",
 };
+
+const stats: { value: string; label: string; icon: LucideIcon }[] = [
+  { value: "110+", label: "Attendees", icon: Users },
+  { value: "24", label: "Sessions", icon: CalendarDays },
+  { value: "38", label: "Partners", icon: Handshake },
+];
 
 export default function RegisterPage() {
   return (
@@ -24,17 +31,16 @@ export default function RegisterPage() {
 
       {/* ── Stats row ───────────────────────────── */}
       <div className="grid grid-cols-3 gap-3 mb-4">
-        {[
-          { value: "110+", label: "Attendees", icon: "👤" },
-          { value: "24",   label: "Sessions",  icon: "📅" },
-          { value: "38",   label: "Partners",  icon: "🌐" },
-        ].map((s) => (
-          <div key={s.label} className="rounded-xl border border-gray-200 bg-white px-3 py-3 shadow-sm">
-            <p className="text-xs text-gray-400 mb-0.5">{s.icon}</p>
+        {stats.map((s) => {
+          const Icon = s.icon;
+          return (
+            <div key={s.label} className="rounded-xl border border-gray-200 bg-white px-3 py-3 shadow-sm">
+              <Icon aria-hidden="true" className="mb-1 h-4 w-4 text-[#5577A2]" strokeWidth={2} />
             <p className="text-xl font-black text-[#1B2B4B]">{s.value}</p>
             <p className="text-[11px] text-gray-500">{s.label}</p>
-          </div>
-        ))}
+            </div>
+          );
+        })}
       </div>
 
       {/* ── Form card ───────────────────────────── */}
